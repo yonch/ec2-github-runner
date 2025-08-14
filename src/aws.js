@@ -21,13 +21,15 @@ function buildRunCommands(githubRegistrationToken, label) {
     // latest version recipe under MIT license from https://github.com/actions/runner/blob/main/scripts/create-latest-svc.sh
     userData = [
       '#!/bin/bash',
-      'exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1',
+      // 'exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1',
       'mkdir actions-runner && cd actions-runner',
       'source /tmp/pre-runner-script.sh',
       'case $(uname -m) in aarch64) ARCH="arm64" ;; amd64|x86_64) ARCH="x64" ;; esac && export RUNNER_ARCH=${ARCH}',
       `latest_version_label=$(curl -s -X GET 'https://api.github.com/repos/actions/runner/releases/latest' | jq -r '.tag_name')`,
       'latest_version=$(echo ${latest_version_label:1})',
-      'curl -O -L https://github.com/actions/runner/releases/download/${latest_version_label}/actions-runner-linux-${RUNNER_ARCH}-${latest_version}.tar.gz',
+      'fetch_url="https://github.com/actions/runner/releases/download/${latest_version_label}/actions-runner-linux-${RUNNER_ARCH}-${latest_version}.tar.gz"',
+      'echo "Fetching runner from ${fetch_url}"',
+      'curl -O -L ${fetch_url}',
       'tar xzf ./actions-runner-linux-${RUNNER_ARCH}-${latest_version}.tar.gz',
       'export RUNNER_ALLOW_RUNASROOT=1',
       `./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label}`,
@@ -115,6 +117,8 @@ async function createEc2InstanceWithParams(imageId, subnetId, securityGroupId, l
   const ec2 = new EC2Client(ec2ClientOptions);
 
   const userData = buildUserDataScript(githubRegistrationToken, label);
+  core.info('User data contents:');
+  core.info(userData);
 
   const params = {
     ImageId: imageId,
