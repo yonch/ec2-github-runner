@@ -27,7 +27,7 @@ function buildRunCommands(githubRegistrationToken, label) {
       'case $(uname -m) in aarch64) ARCH="arm64" ;; amd64|x86_64) ARCH="x64" ;; esac && export RUNNER_ARCH=${ARCH}',
       `latest_version_label=$(curl -s -X GET 'https://api.github.com/repos/actions/runner/releases/latest' | jq -r '.tag_name')`,
       'latest_version=$(echo ${latest_version_label:1})',
-      'curl -O -L https://github.com/actions/runner/releases/download/${latest_version}/actions-runner-linux-${RUNNER_ARCH}-${latest_version}.tar.gz',
+      'curl -O -L https://github.com/actions/runner/releases/download/${latest_version_label}/actions-runner-linux-${RUNNER_ARCH}-${latest_version}.tar.gz',
       'tar xzf ./actions-runner-linux-${RUNNER_ARCH}-${latest_version}.tar.gz',
       'export RUNNER_ALLOW_RUNASROOT=1',
       `./config.sh --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label}`,
