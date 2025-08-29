@@ -11,6 +11,7 @@ function buildRunCommands(githubRegistrationToken, label) {
     // to be pre-installed in the AMI, so we simply cd into that directory and then start the runner
     userData =  [
       '#!/bin/bash',
+      'exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1',
       `cd "${config.input.runnerHomeDir}"`,
       'source /tmp/pre-runner-script.sh',
       'export RUNNER_ALLOW_RUNASROOT=1',
@@ -20,6 +21,7 @@ function buildRunCommands(githubRegistrationToken, label) {
     // latest version recipe under MIT license from https://github.com/actions/runner/blob/main/scripts/create-latest-svc.sh
     userData = [
       '#!/bin/bash',
+      'exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1',
       'mkdir actions-runner && cd actions-runner',
       'source /tmp/pre-runner-script.sh',
       'case $(uname -m) in aarch64) ARCH="arm64" ;; amd64|x86_64) ARCH="x64" ;; esac && export RUNNER_ARCH=${ARCH}',
